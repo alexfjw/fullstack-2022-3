@@ -56,16 +56,26 @@ app.delete('/api/persons/:id', (request, response) => {
 
 app.post('/api/persons', (request, response) => {
   const id = Math.floor(Math.random() * 1000000000)
-  if (request.body && request.body.name) {
-    const name = request.body.name
-    const number = request.body.number
-    persons = persons.concat({ name, number ,id})
-    response.status(200).end()
+
+  const isNewName = (n) => persons.find(p => p.name === n) === undefined
+  if (request.body === undefined) {
+    response.status(406).send({ error: "Missing person info"})
+    return
+  } else if (!request.body.number) {
+    response.status(406).send({ error: "Missing number"})
+    return
+  } else if (!request.body.name) {
+    response.status(406).send({ error: "Missing name"})
+    return
+  } else if (!isNewName(request.body.name)) {
+    response.status(406).send({ error: "Duplicate name"})
     return
   }
 
-  response.status(406).end()
-  return 
+  const name = request.body.name
+  const number = request.body.number
+  persons = persons.concat({ name, number ,id})
+  response.status(200).end()
 })
 
 app.get('/info', (request, response) => {
